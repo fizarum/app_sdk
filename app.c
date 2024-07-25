@@ -37,10 +37,10 @@ void AppOnInit(App_t* app) {
 }
 
 void AppOnOpen(App_t* app) {
-	if (app->state != StateInit) return;
-
-	app->state = StateRunning;
-	app->specification->onStart();
+	if (app->state == StateInit || app->state == StateKilled) {
+		app->state = StateRunning;
+		app->specification->onStart();
+	}
 }
 
 void AppOnUpdate(App_t* app) {

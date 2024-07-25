@@ -17,13 +17,13 @@ extern "C" {
 	/** app's specific implementation */
 	typedef struct AppSpecification_t {
 		const char* name;
-		const void (*handleInput)(_u16 keyData);
-		const void (*onInit)(void);
-		const void (*onStart)(void);
-		const void (*onPause)(void);
-		const void (*onResume)(void);
-		const void (*onUpdate)(void);
-		const void (*onStop)(void);
+		void (*handleInput)(_u16 keyData);
+		void (*onInit)(void);
+		void (*onStart)(void);
+		void (*onPause)(void);
+		void (*onResume)(void);
+		void (*onUpdate)(void);
+		void (*onStop)(void);
 	} AppSpecification_t;
 
 	typedef struct App_t App_t;

@@ -9,16 +9,20 @@ typedef struct AppsManager_t {
 	App_t* activeApp;
 	Array_t* apps;
 	Stack_t* pausedApps;
+	_u16 nextAppId;
 } AppsManager_t;
 
 const _u8 MAX_APPS_COUNT = 20;
 const _u8 MAX_ACTIVE_APPS_COUNT = 5;
+
+static bool _FindAppByIdPredicateBody(const void* expected, const void* value);
 
 AppsManager_t* AppsManagerCreate(void) {
 	AppsManager_t* appsManager = (AppsManager_t*)malloc(sizeof(AppsManager_t));
 
 	if (appsManager == NULL) return NULL;
 
+	appsManager->nextAppId = 0;
 	appsManager->activeApp = NULL;
 	appsManager->menuApp = NULL;
 	appsManager->apps = ArrayCreate(MAX_APPS_COUNT);
@@ -86,6 +90,26 @@ void AppsManagerStartLastAddedApp(AppsManager_t* manager) {
 	}
 }
 
+void AppsManagerStartAppWithId(AppsManager_t* manager, const _u16 appId) {
+	Array_t* apps = manager->apps;
+
+	// if we ahave already running active app, exit
+	if (manager->activeApp != NULL && AppGetState(manager->activeApp) == StateRunning) {
+		return;
+	}
+
+	App_t *app = ArrayFind(apps, (void*)appId, &_FindAppByIdPredicateBody);
+	if (app != NULL) {
+		manager->activeApp = app;
+		AppOnOpen(app);
+	}
+}
+
+const _u16 AppsManagerNextAppId(AppsManager_t* manager) {
+	manager->nextAppId++;
+	return manager->nextAppId;
+}
+
 void AppsManagerStart(AppsManager_t* manager) {
 	//...
 }
@@ -150,11 +174,17 @@ void AppsManagerStopActiveApp(AppsManager_t* manager) {
 	AppOnStop(manager->activeApp);
 	AppOnKill(manager->activeApp);
 	
-	AppDestroy(manager->activeApp);
-
 	manager->activeApp = NULL;
 
 	if (manager->menuApp != NULL) {
 		AppOnResume(manager->menuApp);
 	}
+}
+
+
+static bool _FindAppByIdPredicateBody(const void* expected, const void* value) {
+	const _u16 appIdToFind = (_u16)expected;
+	App_t* app = (App_t*)value;
+	_u16 appId = AppGetId(app);
+	return appIdToFind == appId;
 }
