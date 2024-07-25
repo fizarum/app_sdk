@@ -10,8 +10,12 @@ int main() {
 	AppsManagerStart(manager);
 
 	printf("==> create app\n");
-	App_t* menuApp = AppCreate(1, MenuAppSpecification());
-	App_t* screenLockApp = AppCreate(2, ScreenLockAppSpecification());
+
+	_u16 menuAppId = AppsManagerNextAppId(manager);
+	App_t* menuApp = AppCreate(menuAppId, MenuAppSpecification());
+
+	_u16 screenLockAppId = AppsManagerNextAppId(manager);
+	App_t* screenLockApp = AppCreate(screenLockAppId, ScreenLockAppSpecification());
 
 	printf("==> adding app: %s\n", AppGetName(menuApp));
 	printf("==> adding app: %s\n", AppGetName(screenLockApp));
@@ -37,6 +41,9 @@ int main() {
 	AppsManagerResumeActiveApp(manager);
 	printf("==> stoping user app\n");
 	AppsManagerStopActiveApp(manager);
+
+	printf("==> start app by id\n");
+	AppsManagerStartAppWithId(manager, screenLockAppId);
 
 	printf("end!\n");
 	while (true)
