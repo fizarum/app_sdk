@@ -1,8 +1,8 @@
 #include <stdlib.h>
+#include <array.h>
+#include <stack.h>
 
 #include "apps_manager.h"
-#include "../collections/array.h"
-#include "../collections/stack.h"
 
 typedef struct AppsManager_t {
 	App_t* menuApp;
