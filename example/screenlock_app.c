@@ -6,8 +6,8 @@
 #include "screenlock_app.h"
 #include <stdio.h>
 
-static void handleKey(_u16 keyData) {
-	printf("\t[Screenlock] provided keydata: %u\n", keyData);
+static void handleKey(const void* keyData) {
+	printf("\t[Screenlock] provided keydata: %u\n", *((_u16*)keyData));
 }
 
 static void onAppLoading(void) {

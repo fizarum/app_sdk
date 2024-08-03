@@ -27,7 +27,7 @@ extern "C" {
 
 	void AppsManagerStart(AppsManager_t* manager);
 	void AppsManagerUpdate(AppsManager_t* manager);
-	void AppsManagerHandleInput(AppsManager_t* manager, const _u16 keyData);
+	void AppsManagerHandleInput(AppsManager_t* manager, const void* keyData);
 	void AppsManagerPauseActiveApp(AppsManager_t* manager);
 	void AppsManagerResumeActiveApp(AppsManager_t* manager);
 	void AppsManagerStopActiveApp(AppsManager_t* manager);
