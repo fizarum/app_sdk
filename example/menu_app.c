@@ -2,8 +2,8 @@
 
 #include "menu_app.h"
 
-static void handleKey(_u16 keyData) {
-	printf("\t[Menu app] provided keydata: %u\n", keyData);
+static void handleKey(const void* keyData) {
+	printf("\t[Menu app] provided keydata: %u\n", *((_u16*)keyData));
 }
 
 static void onAppLoading(void) {

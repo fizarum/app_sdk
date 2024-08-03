@@ -51,7 +51,7 @@ void AppOnUpdate(App_t* app) {
 	app->state = StateRunning;
 }
 
-void AppOnHandleInput(App_t* app, const _u16 keyData) {
+void AppOnHandleInput(App_t* app, const void* keyData) {
 	if (app->state != StateRunning) return;
 
 	app->state = StateUpdate;

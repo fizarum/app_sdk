@@ -124,7 +124,7 @@ void AppsManagerUpdate(AppsManager_t* manager) {
 	}
 }
 
-void AppsManagerHandleInput(AppsManager_t* manager, const _u16 keyData) {
+void AppsManagerHandleInput(AppsManager_t* manager, const void* keyData) {
 	App_t* activeApp = manager->activeApp;
 	if (activeApp != NULL) {
 		AppOnHandleInput(activeApp, keyData);
