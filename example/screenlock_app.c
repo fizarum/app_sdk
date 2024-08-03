@@ -7,7 +7,7 @@
 #include <stdio.h>
 
 static void handleKey(const void* keyData) {
-	printf("\t[Screenlock] provided keydata: %u\n", (_u16*)keyData);
+	printf("\t[Screenlock] provided keydata: %u\n", *((_u16*)keyData));
 }
 
 static void onAppLoading(void) {
