@@ -31,6 +31,7 @@ extern "C" {
 	void AppsManagerPauseActiveApp(AppsManager_t* manager);
 	void AppsManagerResumeActiveApp(AppsManager_t* manager);
 	void AppsManagerStopActiveApp(AppsManager_t* manager);
+	void AppsManagerStopAppWithId(AppsManager_t* manager, const _u16 appId);
 
 #ifdef __cplusplus
 }
