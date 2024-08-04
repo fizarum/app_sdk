@@ -6,8 +6,17 @@
 #include "screenlock_app.h"
 #include <stdio.h>
 
-static void handleKey(const void* keyData) {
-	printf("\t[Screenlock] provided keydata: %u\n", *((_u16*)keyData));
+_u16 receivedKeyData = 0;
+void (*requestToStop)(const _u16 appId) = NULL;
+
+static void handleKey(const _u16 appId, const void* keyData) {
+	receivedKeyData = *((_u16*)keyData);
+	if (receivedKeyData == 120) {
+		printf("\t closing app\n");
+		if (requestToStop != NULL) {
+			requestToStop(appId);
+		}
+	}
 }
 
 static void onAppLoading(void) {
@@ -16,10 +25,11 @@ static void onAppLoading(void) {
 
 static void onAppUpdate(void) {
 	printf("\t[Screenlock] on app update...\n");
+	printf("\t press 'X' to unlock device\n");
 }
 
 static void onAppStart(void) {
-	printf("\t[Screenlock] on app start...\n");
+	printf("\t press 'X' to unlock device\n");
 }
 
 static void onAppPause(void) {
@@ -49,6 +59,7 @@ static AppSpecification_t screenLockSpecification = {
 		.onStop = &onAppStop,
 };
 
-AppSpecification_t* ScreenLockAppSpecification() {
+AppSpecification_t* ScreenLockAppSpecification(UserCallback requestToStopCallback) {
+	requestToStop = requestToStopCallback;
 	return &screenLockSpecification;
 }

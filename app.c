@@ -55,7 +55,7 @@ void AppOnHandleInput(App_t* app, const void* keyData) {
 	if (app->state != StateRunning) return;
 
 	app->state = StateUpdate;
-	app->specification->handleInput(keyData);
+	app->specification->handleInput(AppGetId(app), keyData);
 	app->specification->onUpdate();
 	app->state = StateRunning;
 }

@@ -2,7 +2,7 @@
 
 #include "menu_app.h"
 
-static void handleKey(const void* keyData) {
+static void handleKey(const _u16 appId, const void* keyData) {
 	printf("\t[Menu app] provided keydata: %u\n", *((_u16*)keyData));
 }
 

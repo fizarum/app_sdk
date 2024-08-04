@@ -181,7 +181,17 @@ void AppsManagerStopActiveApp(AppsManager_t* manager) {
 	}
 }
 
+void AppsManagerStopAppWithId(AppsManager_t* manager, const _u16 appId) {
+	if (manager->activeApp == NULL) {
+		return;
+	}
 
+	if (AppGetId(manager->activeApp) == appId) {
+		AppsManagerStopActiveApp(manager);
+	}
+}
+
+//
 static bool _FindAppByIdPredicateBody(const void* expected, const void* value) {
 	const _u16 appIdToFind = (_u16)expected;
 	App_t* app = (App_t*)value;

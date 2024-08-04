@@ -14,10 +14,12 @@ extern "C" {
 	typedef int8_t _i8;
 	typedef uint16_t _u16;
 
+	typedef void (UserCallback)(const _u16 appId);
+
 	/** app's specific implementation */
 	typedef struct AppSpecification_t {
 		const char* name;
-		void (*handleInput)(const void* keyData);
+		void (*handleInput)(const _u16 appId, const void* keyData);
 		void (*onInit)(void);
 		void (*onStart)(void);
 		void (*onPause)(void);
