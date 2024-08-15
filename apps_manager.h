@@ -7,37 +7,34 @@ extern "C" {
 
 #include "app.h"
 
-	typedef struct AppsManager_t AppsManager_t;
+typedef struct AppsManager_t AppsManager_t;
 
-	AppsManager_t* AppsManagerCreate(void);
+AppsManager_t* AppsManagerCreate(void);
 
-	/**
-	* @brief register application in appsManger.
-	* @returns true if app is added
-	*/
-	const bool AppsManagerAddApp(AppsManager_t* manager, App_t* app);
-	void AppsManagerStartMenuApp(AppsManager_t* manager, App_t* app);
-	void AppsManagerStartLastAddedApp(AppsManager_t* manager);
-	void AppsManagerStartAppWithId(AppsManager_t* manager, const _u16 appId);
+/**
+ * @brief register application in appsManger.
+ * @returns true if app is added
+ */
+bool AppsManagerAddApp(AppsManager_t* manager, App_t* app);
+void AppsManagerStartMenuApp(AppsManager_t* manager, App_t* app);
+void AppsManagerStartLastAddedApp(AppsManager_t* manager);
+void AppsManagerStartAppWithId(AppsManager_t* manager, const _u16 appId);
 
-	/**
-	 * @brief generate id for application
-	 */
-	const _u16 AppsManagerNextAppId(AppsManager_t* manager);
+/**
+ * @brief generate id for application
+ */
+_u16 AppsManagerNextAppId(AppsManager_t* manager);
 
-	void AppsManagerStart(AppsManager_t* manager);
-	void AppsManagerUpdate(AppsManager_t* manager);
-	void AppsManagerHandleInput(AppsManager_t* manager, const void* keyData);
-	void AppsManagerPauseActiveApp(AppsManager_t* manager);
-	void AppsManagerResumeActiveApp(AppsManager_t* manager);
-	void AppsManagerStopActiveApp(AppsManager_t* manager);
-	void AppsManagerStopAppWithId(AppsManager_t* manager, const _u16 appId);
+void AppsManagerStart(AppsManager_t* manager);
+void AppsManagerUpdate(AppsManager_t* manager);
+void AppsManagerHandleInput(AppsManager_t* manager, const void* keyData);
+void AppsManagerPauseActiveApp(AppsManager_t* manager);
+void AppsManagerResumeActiveApp(AppsManager_t* manager);
+void AppsManagerStopActiveApp(AppsManager_t* manager);
+void AppsManagerStopAppWithId(AppsManager_t* manager, const _u16 appId);
 
 #ifdef __cplusplus
 }
-#endif 
+#endif
 
-
-
-#endif // APPS_MANAGER_H
-
+#endif  // APPS_MANAGER_H
