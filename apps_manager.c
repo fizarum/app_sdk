@@ -1,6 +1,5 @@
 #include "apps_manager.h"
 
-#include <array.h>
 #include <stack.h>
 #include <stdlib.h>
 
@@ -191,6 +190,10 @@ void AppsManagerStopAppWithId(AppsManager_t* manager, const _u16 appId) {
   if (AppGetId(manager->activeApp) == appId) {
     AppsManagerStopActiveApp(manager);
   }
+}
+
+Array_t* AppsManagerGetAllApps(const AppsManager_t* manager) {
+  return manager->apps;
 }
 
 //

@@ -19,18 +19,21 @@ typedef void(UserCallback)(const _u16 appId);
 /** app's specific implementation */
 typedef struct AppSpecification_t {
   const char* name;
-  void (*handleInput)(const _u16 appId, const void* keyData);
+  _u16 id;
+
+  void (*handleInput)(const void* keyData);
   void (*onInit)(void);
   void (*onStart)(void);
   void (*onPause)(void);
   void (*onResume)(void);
   void (*onUpdate)(void);
   void (*onStop)(void);
+
 } AppSpecification_t;
 
 typedef struct App_t App_t;
 
-App_t* AppCreate(_u16 id, AppSpecification_t* specification);
+App_t* AppCreate(AppSpecification_t* specification);
 void AppDestroy(App_t* app);
 
 void AppOnInit(App_t* app);
