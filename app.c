@@ -3,18 +3,16 @@
 #include <stdlib.h>
 
 typedef struct App_t {
-  _u16 id;
   AppSpecification_t* specification;
 
   AppState_t state;
 } App_t;
 
-App_t* AppCreate(_u16 id, AppSpecification_t* specification) {
+App_t* AppCreate(AppSpecification_t* specification) {
   App_t* app = (App_t*)malloc(sizeof(App_t));
 
   if (app == NULL) return NULL;
 
-  app->id = id;
   app->specification = specification;
   app->state = StateCreated;
 
@@ -54,7 +52,7 @@ void AppOnHandleInput(App_t* app, const void* keyData) {
   if (app->state != StateRunning) return;
 
   app->state = StateUpdate;
-  app->specification->handleInput(AppGetId(app), keyData);
+  app->specification->handleInput(keyData);
   app->specification->onUpdate();
   app->state = StateRunning;
 }
@@ -88,6 +86,6 @@ void AppOnKill(App_t* app) {
 
 const char* AppGetName(const App_t* app) { return app->specification->name; }
 
-_u16 AppGetId(const App_t* app) { return app->id; }
+_u16 AppGetId(const App_t* app) { return app->specification->id; }
 
 AppState_t AppGetState(const App_t* app) { return app->state; }

@@ -5,6 +5,8 @@
 extern "C" {
 #endif
 
+#include <array.h>
+
 #include "app.h"
 
 typedef struct AppsManager_t AppsManager_t;
@@ -32,6 +34,8 @@ void AppsManagerPauseActiveApp(AppsManager_t* manager);
 void AppsManagerResumeActiveApp(AppsManager_t* manager);
 void AppsManagerStopActiveApp(AppsManager_t* manager);
 void AppsManagerStopAppWithId(AppsManager_t* manager, const _u16 appId);
+
+Array_t* AppsManagerGetAllApps(const AppsManager_t* manager);
 
 #ifdef __cplusplus
 }
