@@ -23,7 +23,6 @@ void AppDestroy(App_t* app) {
   if (app == NULL) return;
 
   if (app->state != StateKilled) return;
-
   free(app);
 }
 
@@ -42,33 +41,33 @@ void AppOnOpen(App_t* app) {
 
 void AppOnUpdate(App_t* app) {
   if (app->state != StateRunning) return;
-
   app->state = StateUpdate;
   app->specification->onUpdate();
   app->state = StateRunning;
 }
 
 void AppOnHandleInput(App_t* app, const void* keyData) {
-  if (app->state != StateRunning) return;
-
-  app->state = StateUpdate;
-  app->specification->handleInput(keyData);
-  app->specification->onUpdate();
-  app->state = StateRunning;
+  if (app->state == StateRunning) {
+    app->specification->handleInput(keyData);
+  }
 }
 
-void AppOnPause(App_t* app) {
-  if (app->state != StateRunning) return;
-
-  app->state = StatePaused;
-  app->specification->onPause();
+bool AppOnPause(App_t* app) {
+  if (app->state == StateRunning || app->state == StateUpdate) {
+    app->state = StatePaused;
+    app->specification->onPause();
+    return true;
+  }
+  return false;
 }
 
-void AppOnResume(App_t* app) {
-  if (app->state != StatePaused) return;
-
-  app->state = StateRunning;
-  app->specification->onResume();
+bool AppOnResume(App_t* app) {
+  if (app->state == StatePaused) {
+    app->state = StateRunning;
+    app->specification->onResume();
+    return true;
+  }
+  return false;
 }
 
 void AppOnStop(App_t* app) {
@@ -80,7 +79,6 @@ void AppOnStop(App_t* app) {
 
 void AppOnKill(App_t* app) {
   if (app->state != StateStoped) return;
-
   app->state = StateKilled;
 }
 

@@ -40,8 +40,8 @@ void AppOnInit(App_t* app);
 void AppOnOpen(App_t* app);
 void AppOnUpdate(App_t* app);
 void AppOnHandleInput(App_t* app, const void* keyData);
-void AppOnPause(App_t* app);
-void AppOnResume(App_t* app);
+bool AppOnPause(App_t* app);
+bool AppOnResume(App_t* app);
 void AppOnStop(App_t* app);
 void AppOnKill(App_t* app);
 
