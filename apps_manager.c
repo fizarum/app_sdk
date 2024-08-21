@@ -40,7 +40,7 @@ bool AppsManagerAddApp(AppsManager_t* manager, App_t* app) {
   return true;
 }
 
-void AppsManagerStartMenuApp(AppsManager_t* manager, App_t* app) {
+void AppsManagerStart(AppsManager_t* manager, App_t* app) {
   if (manager->menuApp != NULL &&
       AppGetState(manager->menuApp) == StateRunning) {
     return;
@@ -48,6 +48,7 @@ void AppsManagerStartMenuApp(AppsManager_t* manager, App_t* app) {
 
   if (manager->menuApp == NULL) {
     manager->menuApp = app;
+    AppOnInit(manager->menuApp);
     AppOnOpen(app);
   }
 }
@@ -72,9 +73,7 @@ void AppsManagerStartLastAddedApp(AppsManager_t* manager) {
     App_t* app = StackPop(pausedApps);
     manager->activeApp = app;
     AppOnResume(app);
-    if (manager->menuApp != NULL) {
-      AppOnPause(manager->menuApp);
-    }
+    AppOnPause(manager->menuApp);
     return;
   }
 
@@ -83,19 +82,19 @@ void AppsManagerStartLastAddedApp(AppsManager_t* manager) {
     App_t* app = ArrayLastValue(apps);
     manager->activeApp = app;
     AppOnOpen(app);
-    if (manager->menuApp != NULL) {
-      AppOnPause(manager->menuApp);
-    }
+    AppOnPause(manager->menuApp);
     return;
   }
 }
 
 void AppsManagerStartAppWithId(AppsManager_t* manager, const _u16 appId) {
+  AppOnPause(manager->menuApp);
   Array_t* apps = manager->apps;
 
   // if we ahave already running active app, exit
   if (manager->activeApp != NULL &&
       AppGetState(manager->activeApp) == StateRunning) {
+    AppOnResume(manager->menuApp);
     return;
   }
 
@@ -103,6 +102,8 @@ void AppsManagerStartAppWithId(AppsManager_t* manager, const _u16 appId) {
   if (app != NULL) {
     manager->activeApp = app;
     AppOnOpen(app);
+  } else {
+    AppOnResume(manager->menuApp);
   }
 }
 
@@ -111,28 +112,20 @@ _u16 AppsManagerNextAppId(AppsManager_t* manager) {
   return manager->nextAppId;
 }
 
-void AppsManagerStart(AppsManager_t* manager) {
-  //...
-}
-
 void AppsManagerUpdate(AppsManager_t* manager) {
   App_t* activeApp = manager->activeApp;
   if (activeApp != NULL) {
     AppOnUpdate(activeApp);
+    return;
   }
-  if (manager->menuApp != NULL) {
-    AppOnUpdate(manager->menuApp);
-  }
+  AppOnUpdate(manager->menuApp);
 }
 
 void AppsManagerHandleInput(AppsManager_t* manager, const void* keyData) {
   App_t* activeApp = manager->activeApp;
   if (activeApp != NULL) {
     AppOnHandleInput(activeApp, keyData);
-    return;
-  }
-
-  if (manager->menuApp != NULL) {
+  } else {
     AppOnHandleInput(manager->menuApp, keyData);
   }
 }
@@ -144,9 +137,7 @@ void AppsManagerPauseActiveApp(AppsManager_t* manager) {
     StackPush(manager->pausedApps, activeApp);
     manager->activeApp = NULL;
 
-    if (manager->menuApp != NULL) {
-      AppOnResume(manager->menuApp);
-    }
+    AppOnResume(manager->menuApp);
   }
 }
 
@@ -159,10 +150,7 @@ void AppsManagerResumeActiveApp(AppsManager_t* manager) {
   if (app != NULL) {
     manager->activeApp = app;
     AppOnResume(app);
-
-    if (manager->menuApp != NULL) {
-      AppOnPause(manager->menuApp);
-    }
+    AppOnPause(manager->menuApp);
   }
 }
 
@@ -176,10 +164,7 @@ void AppsManagerStopActiveApp(AppsManager_t* manager) {
   AppOnKill(manager->activeApp);
 
   manager->activeApp = NULL;
-
-  if (manager->menuApp != NULL) {
-    AppOnResume(manager->menuApp);
-  }
+  AppOnResume(manager->menuApp);
 }
 
 void AppsManagerStopAppWithId(AppsManager_t* manager, const _u16 appId) {
