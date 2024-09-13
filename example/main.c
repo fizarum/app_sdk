@@ -32,20 +32,20 @@ static void test() {
 	printf("==> create app\n");
 
 	_u16 menuAppId = AppsManagerNextAppId(manager);
-	App_t* menuApp = AppCreate(menuAppId, MenuAppSpecification());
+	App_t* menuApp = AppCreate(MenuAppSpecification(menuAppId));
 
 	_u16 screenLockAppId = AppsManagerNextAppId(manager);
-	AppSpecification_t* screenLockAppSpecification = ScreenLockAppSpecification(&closeAppWithId);
-	App_t* screenLockApp = AppCreate(screenLockAppId, screenLockAppSpecification);
+	AppSpecification_t* screenLockAppSpecification = ScreenLockAppSpecification(screenLockAppId , &closeAppWithId);
+	App_t* screenLockApp = AppCreate(screenLockAppSpecification);
 
-	printf("==> adding app: %s\n", AppGetName(menuApp));
-	printf("==> adding app: %s\n", AppGetName(screenLockApp));
+	printf("==> adding app: %s id[%d]\n", AppGetName(menuApp), AppGetId(menuApp));
+	printf("==> adding app: %s id[%d]\n", AppGetName(screenLockApp), AppGetId(screenLockApp));
 
 	AppsManagerAddApp(manager, menuApp);
 	AppsManagerAddApp(manager, screenLockApp);
 
 	printf("==> starting app menu\n");
-	AppsManagerStartMenuApp(manager, menuApp);
+	AppsManagerStart(manager, menuApp);
 	/*printf("==> starting app\n");
 	AppsManagerStartLastAddedApp(manager);
 
@@ -79,7 +79,6 @@ int main() {
 	SDL_Event e;
 
 	test();
-	AppsManagerStart(manager);
 
 	while (!quit) {
 		//Handle events on queue

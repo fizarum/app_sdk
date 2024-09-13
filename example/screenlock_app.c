@@ -6,15 +6,20 @@
 #include "screenlock_app.h"
 #include <stdio.h>
 
-_u16 receivedKeyData = 0;
+#define CLOSE_BTN_CODE 120
+
 void (*requestToStop)(const _u16 appId) = NULL;
 
-static void handleKey(const _u16 appId, const void* keyData) {
-	receivedKeyData = *((_u16*)keyData);
-	if (receivedKeyData == 120) {
-		printf("\t closing app\n");
+
+static AppSpecification_t spec = {
+	.name = "Screenlock app",
+};
+
+static void handleKey(const void* keyData) {
+	_u16 receivedKeyData = *((_u16*)keyData);
+	if (receivedKeyData == CLOSE_BTN_CODE) {
 		if (requestToStop != NULL) {
-			requestToStop(appId);
+			requestToStop(spec.id);
 		}
 	}
 }
@@ -48,18 +53,16 @@ static void stub(void) {
 	printf("\t[Screenlock] stub called\n");
 }
 
-static AppSpecification_t screenLockSpecification = {
-		.name = "Screenlock app",
-		.handleInput = &handleKey,
-		.onInit = &onAppLoading,
-		.onStart = &onAppStart,
-		.onPause = &onAppPause,
-		.onResume = &onAppResume,
-		.onUpdate = &onAppUpdate,
-		.onStop = &onAppStop,
-};
+AppSpecification_t* ScreenLockAppSpecification(const _u16 id, UserCallback requestToStopCallback) {
+	spec.id = id;
+	spec.handleInput = &handleKey;
+	spec.onInit = &onAppLoading;
+	spec.onStart = &onAppStart;
+	spec.onPause = &onAppPause;
+	spec.onResume = &onAppResume;
+	spec.onUpdate = &AppOnUpdate;
+	spec.onStop = &onAppStop;
 
-AppSpecification_t* ScreenLockAppSpecification(UserCallback requestToStopCallback) {
 	requestToStop = requestToStopCallback;
-	return &screenLockSpecification;
+	return &spec;
 }

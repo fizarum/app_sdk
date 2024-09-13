@@ -7,7 +7,7 @@ extern "C" {
 
 #include "../app.h"
 
-	AppSpecification_t* ScreenLockAppSpecification(UserCallback requestToStopCallback);
+	AppSpecification_t* ScreenLockAppSpecification(const _u16 id, UserCallback requestToStopCallback);
 
 #ifdef __cplusplus
 }

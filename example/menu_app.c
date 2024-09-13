@@ -2,6 +2,10 @@
 
 #include "menu_app.h"
 
+static AppSpecification_t spec = {
+		.name = "Menu app",
+};
+
 static void handleKey(const _u16 appId, const void* keyData) {
 	printf("\t[Menu app] provided keydata: %u\n", *((_u16*)keyData));
 }
@@ -26,17 +30,15 @@ static void onAppStop(void) {
 	printf("\t[Menu app] on app stop...\n");
 }
 
-static AppSpecification_t menuSpecification = {
-		.name = "Menu app",
-		.handleInput = &handleKey,
-		.onInit = &onAppLoading,
-		.onStart = &onAppResume,
-		.onPause = &onAppPause,
-		.onResume = &onAppResume,
-		.onUpdate = &onAppUpdate,
-		.onStop = &onAppStop,
-};
+AppSpecification_t* MenuAppSpecification(const _u16 id) {
+	spec.id = id;
+	spec.handleInput = &handleKey;
+	spec.onInit = &onAppLoading;
+	spec.onStart = &onAppResume;
+	spec.onPause = &onAppPause;
+	spec.onResume = &onAppResume;
+	spec.onUpdate = &onAppUpdate;
+	spec.onStop = &onAppStop;
 
-AppSpecification_t* MenuAppSpecification() {
-	return &menuSpecification;
+	return &spec;
 }
