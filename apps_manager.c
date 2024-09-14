@@ -181,6 +181,10 @@ Array_t* AppsManagerGetAllApps(const AppsManager_t* manager) {
   return manager->apps;
 }
 
+App_t* AppsManagerGetActiveApp(const AppsManager_t* manager) {
+    return manager->activeApp;
+}
+
 //
 static bool _FindAppByIdPredicateBody(const void* expected, const void* value) {
   const _u16 appIdToFind = (_u16)expected;

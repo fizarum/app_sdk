@@ -6,7 +6,7 @@ static AppSpecification_t spec = {
 		.name = "Menu app",
 };
 
-static void handleKey(const _u16 appId, const void* keyData) {
+static void handleKey(const void* keyData) {
 	printf("\t[Menu app] provided keydata: %u\n", *((_u16*)keyData));
 }
 
@@ -15,7 +15,10 @@ static void onAppLoading(void) {
 }
 
 static void onAppUpdate(void) {
-	printf("\t[Menu app] on app update...\n");
+}
+
+static void onBroadcastEvent(BroadcastEvent_t event) {
+	printf("\t[Screenlock] on broadcast event %d\n", event.value);
 }
 
 static void onAppPause(void) {
@@ -38,6 +41,7 @@ AppSpecification_t* MenuAppSpecification(const _u16 id) {
 	spec.onPause = &onAppPause;
 	spec.onResume = &onAppResume;
 	spec.onUpdate = &onAppUpdate;
+	spec.onBroadcastEvent = &onBroadcastEvent;
 	spec.onStop = &onAppStop;
 
 	return &spec;

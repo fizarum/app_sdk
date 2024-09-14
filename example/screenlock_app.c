@@ -6,22 +6,12 @@
 #include "screenlock_app.h"
 #include <stdio.h>
 
-#define CLOSE_BTN_CODE 120
-
-void (*requestToStop)(const _u16 appId) = NULL;
-
-
 static AppSpecification_t spec = {
 	.name = "Screenlock app",
 };
 
 static void handleKey(const void* keyData) {
-	_u16 receivedKeyData = *((_u16*)keyData);
-	if (receivedKeyData == CLOSE_BTN_CODE) {
-		if (requestToStop != NULL) {
-			requestToStop(spec.id);
-		}
-	}
+	printf("\t[Screenlock] provided keydata: %u\n", *((_u16*)keyData));
 }
 
 static void onAppLoading(void) {
@@ -29,8 +19,10 @@ static void onAppLoading(void) {
 }
 
 static void onAppUpdate(void) {
-	printf("\t[Screenlock] on app update...\n");
-	printf("\t press 'X' to unlock device\n");
+}
+
+static void onBroadcastEvent(BroadcastEvent_t event) {
+	printf("\t[Screenlock] on broadcast event %d\n", event.value);
 }
 
 static void onAppStart(void) {
@@ -43,6 +35,7 @@ static void onAppPause(void) {
 
 static void onAppResume(void) {
 	printf("\t[Screenlock] on app resume...\n");
+	printf("\t press 'X' to unlock device\n");
 }
 
 static void onAppStop(void) {
@@ -53,16 +46,16 @@ static void stub(void) {
 	printf("\t[Screenlock] stub called\n");
 }
 
-AppSpecification_t* ScreenLockAppSpecification(const _u16 id, UserCallback requestToStopCallback) {
+AppSpecification_t* ScreenLockAppSpecification(const _u16 id) {
 	spec.id = id;
 	spec.handleInput = &handleKey;
 	spec.onInit = &onAppLoading;
 	spec.onStart = &onAppStart;
 	spec.onPause = &onAppPause;
 	spec.onResume = &onAppResume;
-	spec.onUpdate = &AppOnUpdate;
+	spec.onUpdate = &onAppUpdate;
+	spec.onBroadcastEvent = &onBroadcastEvent;
 	spec.onStop = &onAppStop;
 
-	requestToStop = requestToStopCallback;
 	return &spec;
 }

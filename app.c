@@ -87,3 +87,7 @@ const char* AppGetName(const App_t* app) { return app->specification->name; }
 _u16 AppGetId(const App_t* app) { return app->specification->id; }
 
 AppState_t AppGetState(const App_t* app) { return app->state; }
+
+AppSpecification_t* AppGetSpecification(const App_t* app) {
+    return app->specification;
+}
