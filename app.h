@@ -9,6 +9,7 @@ extern "C" {
 #include <stdint.h>
 
 #include "app_state.h"
+#include "broadcast/broadcast_event.h"
 
 typedef uint8_t _u8;
 typedef int8_t _i8;
@@ -27,6 +28,7 @@ typedef struct AppSpecification_t {
   void (*onPause)(void);
   void (*onResume)(void);
   void (*onUpdate)(void);
+  void (*onBroadcastEvent)(BroadcastEvent_t);
   void (*onStop)(void);
 
 } AppSpecification_t;
@@ -48,6 +50,7 @@ void AppOnKill(App_t* app);
 const char* AppGetName(const App_t* app);
 _u16 AppGetId(const App_t* app);
 AppState_t AppGetState(const App_t* app);
+AppSpecification_t* AppGetSpecification(const App_t* app);
 
 #ifdef __cplusplus
 }

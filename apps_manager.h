@@ -35,6 +35,7 @@ void AppsManagerStopActiveApp(AppsManager_t* manager);
 void AppsManagerStopAppWithId(AppsManager_t* manager, const _u16 appId);
 
 Array_t* AppsManagerGetAllApps(const AppsManager_t* manager);
+App_t* AppsManagerGetActiveApp(const AppsManager_t* manager);
 
 #ifdef __cplusplus
 }
