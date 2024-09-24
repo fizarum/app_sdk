@@ -7,47 +7,38 @@ extern "C" {
 
 typedef enum AppState_t {
   /**
-   * app not yet registered in app manager and
-   * can't initialized and started
-   */
-  StateCreated = 0,
-
-  /**
-   * state when app is initialized, but not opened
+   * State when app is initialized, but not opened
    * yet (shown on screen). Actual when system loads
    * all app descriptors/metadata
    */
-  StateInit = 1,
+  StateInit = 0,
 
   /**
-   * opened and wisible, this state is usually
+   * Opened and visible, this state is usually
    * used by loading app resources
    */
-  StateOpen = 2,
+  StateOpen = 1,
 
-  /** when app is ready to interact with user */
-  StateRunning = 3,
+  /** When app is ready to interact with user */
+  StateRunning = 2,
 
   /**
-   * may be used when system sends some event
+   * May be used when system sends some event
    * to app (like broadcast)
    */
-  StateUpdate = 4,
+  StateUpdate = 3,
 
   /**
-   * if some alert or system menu shown up. Also can
+   * If some alert or system menu shown up. Also can
    * happed before app's stop and further kill
    */
-  StatePaused = 5,
+  StatePaused = 4,
 
   /**
-   * called befor app closing. Its handful to store some
-   * app's session data
+   * Called on app closing. At this state app can't
+   * be shown on screen
    */
-  StateStoped = 6,
-
-  /** app is killed, can't be shown on screen */
-  StateKilled,
+  StateStoped = 5,
 } AppState_t;
 
 #ifdef __cplusplus

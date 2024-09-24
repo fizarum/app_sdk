@@ -17,19 +17,34 @@ typedef uint16_t _u16;
 
 typedef void(UserCallback)(const _u16 appId);
 
+typedef enum RedrawType_t {
+  RedrawNone,
+  RedrawFull,
+  RedrawPartial,
+  RedrawCustom,
+} RedrawType_t;
+
 /** app's specific implementation */
 typedef struct AppSpecification_t {
   const char* name;
   _u16 id;
 
-  void (*handleInput)(const void* keyData);
-  void (*onInit)(void);
+  /**
+   * @brief Flag indicating that app should be redrawn
+   * (by calling onRedraw()) on next app update. Check RedrawType_t definition
+   * for redraw type
+   */
+  RedrawType_t redrawNeeded;
+
   void (*onStart)(void);
   void (*onPause)(void);
   void (*onResume)(void);
   void (*onUpdate)(void);
-  void (*onBroadcastEvent)(BroadcastEvent_t);
+  void (*onRedraw)(RedrawType_t);
   void (*onStop)(void);
+
+  void (*onBroadcastEvent)(BroadcastEvent_t);
+  void (*handleInput)(const void* keyData);
 
 } AppSpecification_t;
 
@@ -38,14 +53,12 @@ typedef struct App_t App_t;
 App_t* AppCreate(AppSpecification_t* specification);
 void AppDestroy(App_t* app);
 
-void AppOnInit(App_t* app);
 void AppOnOpen(App_t* app);
 void AppOnUpdate(App_t* app);
 void AppOnHandleInput(App_t* app, const void* keyData);
 bool AppOnPause(App_t* app);
 bool AppOnResume(App_t* app);
 void AppOnStop(App_t* app);
-void AppOnKill(App_t* app);
 
 const char* AppGetName(const App_t* app);
 _u16 AppGetId(const App_t* app);

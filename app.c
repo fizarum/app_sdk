@@ -14,28 +14,23 @@ App_t* AppCreate(AppSpecification_t* specification) {
   if (app == NULL) return NULL;
 
   app->specification = specification;
-  app->state = StateCreated;
+  app->state = StateInit;
 
   return app;
 }
 
 void AppDestroy(App_t* app) {
   if (app == NULL) return;
+  if (app->state != StateStoped) return;
 
-  if (app->state != StateKilled) return;
   free(app);
 }
 
-void AppOnInit(App_t* app) {
-  if (app->state != StateCreated) return;
-  app->state = StateInit;
-  app->specification->onInit();
-}
-
 void AppOnOpen(App_t* app) {
-  if (app->state == StateInit || app->state == StateKilled) {
+  if (app->state == StateInit || app->state == StateStoped) {
     app->state = StateRunning;
     app->specification->onStart();
+    app->specification->redrawNeeded = RedrawFull;
   }
 }
 
@@ -43,6 +38,11 @@ void AppOnUpdate(App_t* app) {
   if (app->state != StateRunning) return;
   app->state = StateUpdate;
   app->specification->onUpdate();
+
+  if (app->specification->redrawNeeded != RedrawNone) {
+    app->specification->onRedraw(app->specification->redrawNeeded);
+    app->specification->redrawNeeded = RedrawNone;
+  }
   app->state = StateRunning;
 }
 
@@ -65,6 +65,7 @@ bool AppOnResume(App_t* app) {
   if (app->state == StatePaused) {
     app->state = StateRunning;
     app->specification->onResume();
+    app->specification->redrawNeeded = RedrawFull;
     return true;
   }
   return false;
@@ -77,11 +78,6 @@ void AppOnStop(App_t* app) {
   }
 }
 
-void AppOnKill(App_t* app) {
-  if (app->state != StateStoped) return;
-  app->state = StateKilled;
-}
-
 const char* AppGetName(const App_t* app) { return app->specification->name; }
 
 _u16 AppGetId(const App_t* app) { return app->specification->id; }
@@ -89,5 +85,5 @@ _u16 AppGetId(const App_t* app) { return app->specification->id; }
 AppState_t AppGetState(const App_t* app) { return app->state; }
 
 AppSpecification_t* AppGetSpecification(const App_t* app) {
-    return app->specification;
+  return app->specification;
 }
