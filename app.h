@@ -27,6 +27,7 @@ typedef enum RedrawType_t {
 /** app's specific implementation */
 typedef struct AppSpecification_t {
   const char* name;
+  const _u16 background;
   _u16 id;
 
   /**
