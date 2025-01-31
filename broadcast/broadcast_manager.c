@@ -52,7 +52,8 @@ BroadcastEvent_t event;
 static bool _findSubscriberByEventType(const void* expectedEventType,
                                        const void* subscriber) {
   // BroadcastEventType_t
-  return (_u8)expectedEventType == ((BroadcastSubsriber_t*)subscriber)->type;
+  return ((BroadcastEventType_t)expectedEventType) ==
+         ((BroadcastSubsriber_t*)subscriber)->type;
 }
 
 static bool _findSubscriberByAppId(const void* expectedId,
