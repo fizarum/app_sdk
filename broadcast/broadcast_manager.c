@@ -3,6 +3,7 @@
 #include <array.h>
 #include <map.h>
 #include <stack.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <types.h>
 
@@ -12,26 +13,57 @@ const _u8 MAX_SUBSCRIBERS_COUNT = 10;
 const _u8 MAX_EVENTS_COUNT = 20;
 
 typedef struct BroadcastManager_t {
+  bool initialized;
   Array_t* subs;
   Stack_t* events;
 
 } BroadcastManager_t;
 
-BroadcastManager_t* BroadcastManagerCreate() {
-  BroadcastManager_t* manager =
-      (BroadcastManager_t*)malloc(sizeof(BroadcastManager_t));
+static BroadcastManager_t manager = {
+    .initialized = false,
+    .events = NULL,
+    .subs = NULL,
+};
 
-  if (manager == NULL) {
-    return NULL;
+BroadcastSubsriber_t* BroadcastSubsriber_Create(const BroadcastEventType_t type,
+                                                AppSpecification_t* spec);
+
+void BroadcastManager_Init() {
+  if (manager.initialized == false) {
+    manager.initialized = true;
+    manager.subs = ArrayCreate(MAX_SUBSCRIBERS_COUNT);
+    manager.events = StackCreate(MAX_EVENTS_COUNT);
   }
-  manager->subs = ArrayCreate(MAX_SUBSCRIBERS_COUNT);
-  manager->events = StackCreate(MAX_EVENTS_COUNT);
-
-  return manager;
 }
 
-BroadcastSubsriber_t* BroadcastSubsriberCreate(const BroadcastEventType_t type,
-                                               AppSpecification_t* spec) {
+static bool _findSubscriberByEventType(const void* expectedEventType,
+                                       const void* subscriber);
+
+BroadcastEvent_t event;
+
+void BroadcastManager_Update() {
+  if (ArrayIsEmpty(manager.subs) == true) {
+    return;
+  }
+
+  if (StackIsEmpty(manager.events) == true) {
+    return;
+  }
+
+  event.value = (_u32)StackPop(manager.events);
+
+  printf("delivery event type: %lu\n", event.value);
+
+  BroadcastSubsriber_t* subscriber =
+      ArrayFind(manager.subs, (void*)(event.type), _findSubscriberByEventType);
+  if (subscriber == NULL || subscriber->spec == NULL) {
+    return;
+  }
+  subscriber->spec->onBroadcastEvent(event);
+}
+
+BroadcastSubsriber_t* BroadcastSubsriber_Create(const BroadcastEventType_t type,
+                                                AppSpecification_t* spec) {
   BroadcastSubsriber_t* subscriber =
       (BroadcastSubsriber_t*)malloc(sizeof(BroadcastSubsriber_t));
 
@@ -45,13 +77,8 @@ BroadcastSubsriber_t* BroadcastSubsriberCreate(const BroadcastEventType_t type,
   return subscriber;
 }
 
-#include <stdio.h>
-
-BroadcastEvent_t event;
-
 static bool _findSubscriberByEventType(const void* expectedEventType,
                                        const void* subscriber) {
-  // BroadcastEventType_t
   return ((BroadcastEventType_t)expectedEventType) ==
          ((BroadcastSubsriber_t*)subscriber)->type;
 }
@@ -61,35 +88,18 @@ static bool _findSubscriberByAppId(const void* expectedId,
   return *((_u16*)expectedId) == ((BroadcastSubsriber_t*)subscriber)->spec->id;
 }
 
-void BroadcastManagerUpdate(BroadcastManager_t* manager) {
-  if (ArrayIsEmpty(manager->subs) == true) {
-    return;
-  }
-
-  if (StackIsEmpty(manager->events) == true) {
-    return;
-  }
-
-  event.value = (_u32)StackPop(manager->events);
-
-  printf("delivery event type: %lu\n", event.value);
-
-  BroadcastSubsriber_t* subscriber =
-      ArrayFind(manager->subs, (void*)(event.type), _findSubscriberByEventType);
-  if (subscriber == NULL) {
-    return;
-  }
-  subscriber->spec->onBroadcastEvent(event);
+void BroadcastManager_SendEvent(BroadcastEvent_t event) {
+  StackPush(manager.events, (void*)(event.value));
 }
 
-void BroadcastManagerSendEvent(BroadcastManager_t* manager,
-                               BroadcastEvent_t event) {
-  StackPush(manager->events, (void*)(event.value));
+void BroadcastManager_SendEventType(BroadcastEventType_t eventType) {
+  event.value = 0;
+  event.type = eventType;
+  StackPush(manager.events, event.value);
 }
 
-bool BroadcastManagerSubscribe(const BroadcastManager_t* manager,
-                               const BroadcastEventType_t eventType,
-                               const App_t* app) {
+bool BroadcastManager_AddListener(const BroadcastEventType_t eventType,
+                                  const App_t* app) {
   if (app == NULL) {
     return false;
   }
@@ -98,15 +108,14 @@ bool BroadcastManagerSubscribe(const BroadcastManager_t* manager,
 
   printf("subscribed app id [%d] to event type[%d]\n", spec->id, eventType);
 
-  BroadcastSubsriber_t* subscriber = BroadcastSubsriberCreate(eventType, spec);
+  BroadcastSubsriber_t* subscriber = BroadcastSubsriber_Create(eventType, spec);
   if (subscriber == NULL) {
     return false;
   }
-  return ArrayAdd(manager->subs, subscriber);
+  return ArrayAdd(manager.subs, subscriber);
 }
 
-bool BroadcastManagerUnsubscribe(const BroadcastManager_t* manager,
-                                 const App_t* app) {
+bool BroadcastManager_RemoveListener(const App_t* app) {
   if (app == NULL) {
     return false;
   }
@@ -115,11 +124,11 @@ bool BroadcastManagerUnsubscribe(const BroadcastManager_t* manager,
 
   printf("unsubscribed app id [%d]\n", spec->id);
 
-  BroadcastSubsriber_t* found =
-      ArrayFind(manager->subs, &(spec->id), _findSubscriberByAppId);
-  if (found == NULL) {
+  BroadcastSubsriber_t* subscriber =
+      ArrayFind(manager.subs, &(spec->id), _findSubscriberByAppId);
+  if (subscriber == NULL) {
     return false;
   }
 
-  return ArrayRemove(manager->subs, found);
+  return ArrayRemove(manager.subs, subscriber);
 }

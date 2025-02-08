@@ -8,12 +8,16 @@ extern "C" {
 #include <types.h>
 
 typedef enum BroadcastEventType_t {
-  EventTypeNone = 0,
+  EventTypeNone,
   EventTypeAll,
   EventTypeGoingToSleep,
   EventTypeWakeUp,
+
   // power
-  EventTypeChangeBatteryLevel,
+  ChangingLevelChange,
+  ChargingOn,
+  ChargingOff,
+
   // screen
   EventTypeChangeScreenBrightness,
 } BroadcastEventType_t;
