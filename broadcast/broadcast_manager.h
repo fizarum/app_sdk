@@ -18,11 +18,13 @@ typedef struct BroadcastSubsriber_t {
 void BroadcastManager_Init();
 void BroadcastManager_Update();
 
-void BroadcastManager_SendEvent(BroadcastEvent_t event);
-void BroadcastManager_SendEventType(BroadcastEventType_t eventType);
+/**
+ * @param event is unsigned 32 int which should reflect BroadcastEvent_t
+ */
+void BroadcastManager_SendEvent(_u32 event);
 
 bool BroadcastManager_AddListener(const BroadcastEventType_t eventType,
-                                const App_t* app);
+                                  const App_t* app);
 bool BroadcastManager_RemoveListener(const App_t* spec);
 
 #ifdef __cplusplus
