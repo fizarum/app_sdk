@@ -61,7 +61,6 @@ static void test() {
 }
 
 static void sendTestBroadcastEvent() {
-  event.index = 0;
   event.type = EventTypeChangeBatteryLevel;
   event.payload = 98;
   printf("sending broadcast event: %d\n", event.value);
