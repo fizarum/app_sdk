@@ -15,6 +15,7 @@ const _u8 MAX_APPS_COUNT = 20;
 const _u8 MAX_ACTIVE_APPS_COUNT = 5;
 
 static bool _FindAppByIdPredicate(const void* expected, const void* value);
+static _u16 _AppsManagerNextAppId(AppsManager_t* manager);
 
 AppsManager_t* AppsManagerCreate(void) {
   AppsManager_t* appsManager = (AppsManager_t*)malloc(sizeof(AppsManager_t));
@@ -30,12 +31,30 @@ AppsManager_t* AppsManagerCreate(void) {
   return appsManager;
 }
 
-bool AppsManagerAddApp(AppsManager_t* manager, App_t* app) {
+App_t* AppsMangerSetLauncher(AppsManager_t* manager,
+                             AppSpecification_t* specs) {
+  if (ArrayIsFull(manager->apps) == true) {
+    return NULL;
+  }
+  specs->id = _AppsManagerNextAppId(manager);
+  App_t* launcher = AppCreate(specs);
+  manager->menuApp = launcher;
+
+  return launcher;
+}
+
+_u16 AppsMangerAddAppSpecs(AppsManager_t* manager, AppSpecification_t* specs) {
   if (ArrayIsFull(manager->apps) == true) {
     return false;
   }
 
-  return ArrayAdd(manager->apps, app);
+  specs->id = _AppsManagerNextAppId(manager);
+  App_t* app = AppCreate(specs);
+
+  if (ArrayAdd(manager->apps, app)) {
+    return specs->id;
+  }
+  return APP_ID_NA;
 }
 
 void AppsManagerStart(AppsManager_t* manager, App_t* app) {
@@ -46,8 +65,9 @@ void AppsManagerStart(AppsManager_t* manager, App_t* app) {
 
   if (manager->menuApp == NULL) {
     manager->menuApp = app;
-    AppOnOpen(manager->menuApp);
   }
+
+  AppOnOpen(manager->menuApp);
 }
 
 void AppsManagerStartLastAddedApp(AppsManager_t* manager) {
@@ -101,11 +121,6 @@ void AppsManagerStartAppWithId(AppsManager_t* manager, const _u16 appId) {
   } else {
     AppOnResume(manager->menuApp);
   }
-}
-
-_u16 AppsManagerNextAppId(AppsManager_t* manager) {
-  manager->nextAppId++;
-  return manager->nextAppId;
 }
 
 void AppsManagerUpdate(AppsManager_t* manager) {
@@ -186,4 +201,12 @@ static bool _FindAppByIdPredicate(const void* expected, const void* value) {
   App_t* app = (App_t*)value;
   _u16 appId = AppGetId(app);
   return appIdToFind == appId;
+}
+
+/**
+ * @brief generate id for application
+ */
+_u16 _AppsManagerNextAppId(AppsManager_t* manager) {
+  manager->nextAppId++;
+  return manager->nextAppId;
 }

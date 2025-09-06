@@ -9,23 +9,22 @@ extern "C" {
 
 #include "app.h"
 
+#define APP_ID_NA UINT16_MAX
+
 typedef struct AppsManager_t AppsManager_t;
 
 AppsManager_t* AppsManagerCreate(void);
 
+App_t* AppsMangerSetLauncher(AppsManager_t* manager, AppSpecification_t* specs);
+
 /**
  * @brief register application in appsManger.
- * @returns true if app is added
+ * @returns app id if added or APP_ID_NA otherwise
  */
-bool AppsManagerAddApp(AppsManager_t* manager, App_t* app);
+_u16 AppsMangerAddAppSpecs(AppsManager_t* manager, AppSpecification_t* specs);
 void AppsManagerStart(AppsManager_t* manager, App_t* app);
 void AppsManagerStartLastAddedApp(AppsManager_t* manager);
 void AppsManagerStartAppWithId(AppsManager_t* manager, const _u16 appId);
-
-/**
- * @brief generate id for application
- */
-_u16 AppsManagerNextAppId(AppsManager_t* manager);
 
 void AppsManagerUpdate(AppsManager_t* manager);
 void AppsManagerHandleInput(AppsManager_t* manager, const void* keyData);
