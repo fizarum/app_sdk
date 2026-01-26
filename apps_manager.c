@@ -107,7 +107,7 @@ void AppsManagerStartAppWithId(AppsManager_t* manager, const _u16 appId) {
   AppOnPause(manager->menuApp);
   Array_t* apps = manager->apps;
 
-  // if we ahave already running active app, exit
+  // if we have already running active app, exit
   if (manager->activeApp != NULL &&
       AppGetState(manager->activeApp) == StateRunning) {
     AppOnResume(manager->menuApp);
@@ -117,7 +117,12 @@ void AppsManagerStartAppWithId(AppsManager_t* manager, const _u16 appId) {
   App_t* app = ArrayFind(apps, (void*)appId, &_FindAppByIdPredicate);
   if (app != NULL) {
     manager->activeApp = app;
-    AppOnOpen(manager->activeApp);
+    bool started = AppOnOpen(manager->activeApp);
+    if (started == false) {
+      manager->activeApp = NULL;
+      AppOnResume(manager->menuApp);
+      return;
+    }
   } else {
     AppOnResume(manager->menuApp);
   }

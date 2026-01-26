@@ -62,7 +62,8 @@ void BroadcastManager_Update() {
     printf("event NOT delivered, no receiver, event: %lu\n", event.value);
     return;
   }
-  printf("delivery event type: %lu\n", event.value);
+  printf("delivery event type: %lu [type: %d, payload: %d]\n", event.value,
+         event.type, event.payload);
   subscriber->spec->onBroadcastEvent(event);
 }
 
