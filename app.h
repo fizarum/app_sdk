@@ -53,7 +53,7 @@ typedef struct App_t App_t;
 App_t* AppCreate(AppSpecification_t* specification);
 void AppDestroy(App_t* app);
 
-void AppOnOpen(App_t* app);
+bool AppOnOpen(App_t* app);
 void AppOnUpdate(App_t* app);
 void AppOnHandleInput(App_t* app, const void* keyData);
 bool AppOnPause(App_t* app);

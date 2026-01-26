@@ -26,28 +26,40 @@ void AppDestroy(App_t* app) {
   free(app);
 }
 
-void AppOnOpen(App_t* app) {
+bool AppOnOpen(App_t* app) {
   if (app->state == StateInit || app->state == StateStoped) {
     app->state = StateRunning;
-    app->specification->onStart();
-    app->specification->redrawNeeded = RedrawFull;
+    AppSpecification_t* specs = app->specification;
+
+    if (specs->onStart != NULL) {
+      specs->onStart();
+      specs->redrawNeeded = RedrawFull;
+      return true;
+    } else {
+      // failed to start app, return to main menu
+      return false;
+    }
   }
 }
 
 void AppOnUpdate(App_t* app) {
   if (app->state != StateRunning) return;
   app->state = StateUpdate;
-  app->specification->onUpdate();
+  AppSpecification_t* specs = app->specification;
 
-  if (app->specification->redrawNeeded != RedrawNone) {
-    app->specification->onRedraw(app->specification->redrawNeeded);
-    app->specification->redrawNeeded = RedrawNone;
+  if (specs->onUpdate != NULL) {
+    specs->onUpdate();
+  }
+
+  if (specs->onRedraw != NULL && specs->redrawNeeded != RedrawNone) {
+    specs->onRedraw(app->specification->redrawNeeded);
+    specs->redrawNeeded = RedrawNone;
   }
   app->state = StateRunning;
 }
 
 void AppOnHandleInput(App_t* app, const void* keyData) {
-  if (app->state == StateRunning) {
+  if (app->state == StateRunning && app->specification->handleInput != NULL) {
     app->specification->handleInput(keyData);
   }
 }
@@ -55,7 +67,9 @@ void AppOnHandleInput(App_t* app, const void* keyData) {
 bool AppOnPause(App_t* app) {
   if (app->state == StateRunning || app->state == StateUpdate) {
     app->state = StatePaused;
-    app->specification->onPause();
+    if (app->specification->onPause != NULL) {
+      app->specification->onPause();
+    }
     return true;
   }
   return false;
@@ -64,7 +78,9 @@ bool AppOnPause(App_t* app) {
 bool AppOnResume(App_t* app) {
   if (app->state == StatePaused) {
     app->state = StateRunning;
-    app->specification->onResume();
+    if (app->specification->onResume != NULL) {
+      app->specification->onResume();
+    }
     app->specification->redrawNeeded = RedrawFull;
     return true;
   }
@@ -74,7 +90,9 @@ bool AppOnResume(App_t* app) {
 void AppOnStop(App_t* app) {
   if (app->state == StateRunning || app->state == StatePaused) {
     app->state = StateStoped;
-    app->specification->onStop();
+    if (app->specification->onStop != NULL) {
+      app->specification->onStop();
+    }
   }
 }
 
