@@ -7,10 +7,10 @@ extern "C" {
 
 #include "../app.h"
 
-	AppSpecification_t* ScreenLockAppSpecification(const _u16 id);
+app_specification_t* ScreenLockAppSpecification(const _u16 id);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif //SCREENLOCK_APP_H
+#endif  // SCREENLOCK_APP_H

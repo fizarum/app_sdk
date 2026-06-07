@@ -20,9 +20,9 @@ SDL_Window* gWindow = NULL;
 SDL_Surface* gScreenSurface = NULL;
 
 AppsManager_t* manager;
-BroadcastManager_t* broadcastManager;
+broadcast_manager_t* broadcastManager;
 
-BroadcastEvent_t event;
+broadcast_event_t event;
 
 static void test() {
   manager = AppsManagerCreate();
@@ -31,12 +31,12 @@ static void test() {
   printf("==> create app\n");
 
   _u16 menuAppId = AppsManagerNextAppId(manager);
-  App_t* menuApp = AppCreate(MenuAppSpecification(menuAppId));
+  app_t* menuApp = AppCreate(MenuAppSpecification(menuAppId));
 
   _u16 screenLockAppId = AppsManagerNextAppId(manager);
-  AppSpecification_t* screenLockAppSpecification =
+  app_specification_t* screenLockAppSpecification =
       ScreenLockAppSpecification(screenLockAppId);
-  App_t* screenLockApp = AppCreate(screenLockAppSpecification);
+  app_t* screenLockApp = AppCreate(screenLockAppSpecification);
 
   printf("==> adding app: %s id[%d]\n", AppGetName(menuApp), AppGetId(menuApp));
   printf("==> adding app: %s id[%d]\n", AppGetName(screenLockApp),
@@ -64,7 +64,7 @@ static void sendTestBroadcastEvent() {
   event.type = EventTypeChangeBatteryLevel;
   event.payload = 98;
   printf("sending broadcast event: %d\n", event.value);
-  BroadcastManager_SendEvent(broadcastManager, event);
+  broadcast_manager_send_event(broadcastManager, event);
 }
 
 int main() {
@@ -94,8 +94,8 @@ int main() {
 
           case KEYCODE_TRIGGER_MENU: {
             printf("pressed menu button\n");
-            App_t* activeApp = AppsManagerGetActiveApp(manager);
-            BroadcastManager_RemoveListener(broadcastManager, activeApp);
+            app_t* activeApp = AppsManagerGetActiveApp(manager);
+            broadcast_manager_remove_listener(broadcastManager, activeApp);
             AppsManagerStopActiveApp(manager);
             break;
           }
@@ -111,7 +111,7 @@ int main() {
       }
     }
     AppsManagerUpdate(manager);
-    BroadcastManager_Update(broadcastManager);
+    broadcast_manager_update(broadcastManager);
   }
 
   return 0;

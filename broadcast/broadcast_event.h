@@ -1,5 +1,4 @@
-#ifndef BROADCAST_EVENT_H
-#define BROADCAST_EVENT_H
+#pragma once
 
 #ifdef __cplusplus
 extern "C" {
@@ -7,7 +6,7 @@ extern "C" {
 
 #include <types.h>
 
-typedef enum BroadcastEventType_t {
+typedef enum broadcast_event_type_t {
   EventTypeNone,
   EventTypeAll,
   EventTypeGoingToSleep,
@@ -19,7 +18,12 @@ typedef enum BroadcastEventType_t {
 
   // screen
   EventTypeChangeScreenBrightness,
-} BroadcastEventType_t;
+
+  // storage
+  EventMount,
+  EventUnmount,
+
+} broadcast_event_type_t;
 
 /**
  * @brief bit mapping:
@@ -27,17 +31,15 @@ typedef enum BroadcastEventType_t {
  * [8:23] - payload
  * [24:31] - payload annex
  */
-typedef union BroadcastEvent_t {
+typedef union broadcast_event_t {
   struct {
     _u8 type : 8;
     _u16 payload : 16;
     _u8 payloadAnnex : 8;
   };
   _u32 value;
-} BroadcastEvent_t;
+} broadcast_event_t;
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif  // BROADCAST_EVENT_H

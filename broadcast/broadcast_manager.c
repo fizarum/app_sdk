@@ -8,34 +8,36 @@
 #include <types.h>
 
 #include "broadcast_event.h"
+#include "broadcast_subsriber.h"
 
-const _u8 MAX_SUBSCRIBERS_COUNT = 10;
-const _u8 MAX_EVENTS_COUNT = 20;
+#define MAX_SUBSCRIBERS_COUNT 10
+#define MAX_EVENTS_COUNT 20
 
-typedef struct BroadcastManager_t {
+typedef struct broadcast_manager_t {
   bool initialized;
   Array_t* subs;
   Stack_t* events;
+} broadcast_manager_t;
 
-} BroadcastManager_t;
-
-static BroadcastManager_t manager = {
+static broadcast_manager_t manager = {
     .initialized = false,
     .events = NULL,
     .subs = NULL,
 };
 
-BroadcastSubsriber_t* BroadcastSubsriber_Create(const BroadcastEventType_t type,
-                                                AppSpecification_t* spec);
+broadcast_event_t event = {
+    .value = 0,
+};
 
-static bool FindSubscriberByEventType(const void* expectedEventType,
+broadcast_subsriber_t* _broadcast_subscriber_create(
+    const broadcast_event_type_t type, app_specification_t* spec);
+
+static bool _find_subscriber_by_event_type(const void* expectedEventType,
                                       const void* subscriber);
-static bool FindSubscriberByAppId(const void* expectedId,
+static bool _find_subscriber_by_app_id(const void* expectedId,
                                   const void* subscriber);
 
-BroadcastEvent_t event;
-
-void BroadcastManager_Init() {
+void broadcast_manager_init() {
   if (manager.initialized == false) {
     manager.subs = ArrayCreate(MAX_SUBSCRIBERS_COUNT);
     manager.events = StackCreate(MAX_EVENTS_COUNT);
@@ -44,19 +46,18 @@ void BroadcastManager_Init() {
   }
 }
 
-void BroadcastManager_Update() {
+void broadcast_manager_update() {
   if (ArrayIsEmpty(manager.subs) == true) {
     return;
   }
-
   if (StackIsEmpty(manager.events) == true) {
     return;
   }
 
   event.value = (_u32)StackPop(manager.events);
 
-  BroadcastSubsriber_t* subscriber =
-      ArrayFind(manager.subs, (void*)(event.type), FindSubscriberByEventType);
+  broadcast_subsriber_t* subscriber =
+      ArrayFind(manager.subs, (void*)(event.type), _find_subscriber_by_event_type);
   if (subscriber == NULL || subscriber->spec == NULL) {
     // event isn't delivered - not such receiver
     printf("event NOT delivered, no receiver, event: %lu\n", event.value);
@@ -67,7 +68,7 @@ void BroadcastManager_Update() {
   subscriber->spec->onBroadcastEvent(event);
 }
 
-void BroadcastManager_SendEvent(_u32 eventArg) {
+void broadcast_manager_send_event(_u32 eventArg) {
   if (manager.initialized == false) {
     return;
   }
@@ -75,8 +76,8 @@ void BroadcastManager_SendEvent(_u32 eventArg) {
   StackPush(manager.events, eventArg);
 }
 
-bool BroadcastManager_AddListener(const BroadcastEventType_t eventType,
-                                  const App_t* app) {
+bool broadcast_manager_add_listener(const broadcast_event_type_t eventType,
+                                    const app_t* app) {
   if (manager.initialized == false) {
     return false;
   }
@@ -85,28 +86,29 @@ bool BroadcastManager_AddListener(const BroadcastEventType_t eventType,
     return false;
   }
 
-  AppSpecification_t* spec = AppGetSpecification(app);
+  app_specification_t* spec = AppGetSpecification(app);
 
   printf("subscribed app id [%d] to event type[%d]\n", spec->id, eventType);
 
-  BroadcastSubsriber_t* subscriber = BroadcastSubsriber_Create(eventType, spec);
+  broadcast_subsriber_t* subscriber =
+      _broadcast_subscriber_create(eventType, spec);
   if (subscriber == NULL) {
     return false;
   }
   return ArrayAdd(manager.subs, subscriber);
 }
 
-bool BroadcastManager_RemoveListener(const App_t* app) {
+bool broadcast_manager_remove_listener(const app_t* app) {
   if (app == NULL) {
     return false;
   }
 
-  AppSpecification_t* spec = AppGetSpecification(app);
+  app_specification_t* spec = AppGetSpecification(app);
 
   printf("unsubscribed app id [%d]\n", spec->id);
 
-  BroadcastSubsriber_t* subscriber =
-      ArrayFind(manager.subs, &(spec->id), FindSubscriberByAppId);
+  broadcast_subsriber_t* subscriber =
+      ArrayFind(manager.subs, &(spec->id), _find_subscriber_by_app_id);
   if (subscriber == NULL) {
     return false;
   }
@@ -115,10 +117,10 @@ bool BroadcastManager_RemoveListener(const App_t* app) {
 }
 
 // private part
-BroadcastSubsriber_t* BroadcastSubsriber_Create(const BroadcastEventType_t type,
-                                                AppSpecification_t* spec) {
-  BroadcastSubsriber_t* subscriber =
-      (BroadcastSubsriber_t*)malloc(sizeof(BroadcastSubsriber_t));
+broadcast_subsriber_t* _broadcast_subscriber_create(
+    const broadcast_event_type_t type, app_specification_t* spec) {
+  broadcast_subsriber_t* subscriber =
+      (broadcast_subsriber_t*)malloc(sizeof(broadcast_subsriber_t));
 
   if (subscriber == NULL) {
     return NULL;
@@ -130,13 +132,13 @@ BroadcastSubsriber_t* BroadcastSubsriber_Create(const BroadcastEventType_t type,
   return subscriber;
 }
 
-static bool FindSubscriberByEventType(const void* expectedEventType,
+static bool _find_subscriber_by_event_type(const void* expectedEventType,
                                       const void* subscriber) {
-  return ((BroadcastEventType_t)expectedEventType) ==
-         ((BroadcastSubsriber_t*)subscriber)->type;
+  return ((broadcast_event_type_t)expectedEventType) ==
+         ((broadcast_subsriber_t*)subscriber)->type;
 }
 
-static bool FindSubscriberByAppId(const void* expectedId,
+static bool _find_subscriber_by_app_id(const void* expectedId,
                                   const void* subscriber) {
-  return *((_u16*)expectedId) == ((BroadcastSubsriber_t*)subscriber)->spec->id;
+  return *((_u16*)expectedId) == ((broadcast_subsriber_t*)subscriber)->spec->id;
 }

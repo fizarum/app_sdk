@@ -1,11 +1,10 @@
-#ifndef APP_STATE_H
-#define APP_STATE_H
+#pragma once
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef enum AppState_t {
+typedef enum app_state_t {
   /**
    * State when app is initialized, but not opened
    * yet (shown on screen). Actual when system loads
@@ -39,10 +38,8 @@ typedef enum AppState_t {
    * be shown on screen
    */
   StateStoped = 5,
-} AppState_t;
+} app_state_t;
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif  // APP_STATE_H
