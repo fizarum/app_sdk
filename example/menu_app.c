@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-static AppSpecification_t spec = {
+static app_specification_t spec = {
     .name = "Menu app",
 };
 
@@ -17,7 +17,7 @@ static bool onAppLoading(void) {
 
 static void onAppUpdate(void) {}
 
-static void onBroadcastEvent(BroadcastEvent_t event) {
+static void onBroadcastEvent(broadcast_event_t event) {
   printf("\t[Screenlock] on broadcast event %d\n", event.value);
 }
 
@@ -27,7 +27,7 @@ static void onAppResume(void) { printf("\t[Menu app] on app resume...\n"); }
 
 static void onAppStop(void) { printf("\t[Menu app] on app stop...\n"); }
 
-AppSpecification_t* MenuAppSpecification(const _u16 id) {
+app_specification_t* MenuAppSpecification(const _u16 id) {
   spec.id = id;
   spec.handleInput = &handleKey;
   spec.onInit = &onAppLoading;

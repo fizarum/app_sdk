@@ -1,5 +1,4 @@
-#ifndef BROADCAST_MANAGER_H
-#define BROADCAST_MANAGER_H
+#pragma once
 
 #ifdef __cplusplus
 extern "C" {
@@ -10,25 +9,18 @@ extern "C" {
 #include "../app.h"
 #include "broadcast_event.h"
 
-typedef struct BroadcastSubsriber_t {
-  BroadcastEventType_t type;
-  AppSpecification_t* spec;
-} BroadcastSubsriber_t;
-
-void BroadcastManager_Init();
-void BroadcastManager_Update();
+void broadcast_manager_init();
+void broadcast_manager_update();
 
 /**
- * @param event is unsigned 32 int which should reflect BroadcastEvent_t
+ * @param event is unsigned 32 int which should reflect broadcast_event_t
  */
-void BroadcastManager_SendEvent(_u32 event);
+void broadcast_manager_send_event(_u32 event);
 
-bool BroadcastManager_AddListener(const BroadcastEventType_t eventType,
-                                  const App_t* app);
-bool BroadcastManager_RemoveListener(const App_t* spec);
+bool broadcast_manager_add_listener(const broadcast_event_type_t eventType,
+                                    const app_t* app);
+bool broadcast_manager_remove_listener(const app_t* spec);
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif  // BROADCAST_MANAGER_H

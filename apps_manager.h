@@ -1,5 +1,4 @@
-#ifndef APPS_MANAGER_H
-#define APPS_MANAGER_H
+#pragma once
 
 #ifdef __cplusplus
 extern "C" {
@@ -13,31 +12,27 @@ extern "C" {
 
 typedef struct AppsManager_t AppsManager_t;
 
-AppsManager_t* AppsManagerCreate(void);
-
-App_t* AppsMangerSetLauncher(AppsManager_t* manager, AppSpecification_t* specs);
+void apps_manager_init();
+app_t* apps_manger_set_launcher(app_specification_t* specs);
 
 /**
  * @brief register application in appsManger.
  * @returns app id if added or APP_ID_NA otherwise
  */
-_u16 AppsMangerAddAppSpecs(AppsManager_t* manager, AppSpecification_t* specs);
-void AppsManagerStart(AppsManager_t* manager, App_t* app);
-void AppsManagerStartLastAddedApp(AppsManager_t* manager);
-void AppsManagerStartAppWithId(AppsManager_t* manager, const _u16 appId);
+_u16 apps_manager_add(app_specification_t* specs);
+void apps_manager_start(app_t* app);
+void apps_manager_start_last_added_app();
+void apps_manager_start_with_Id(const _u16 appId);
 
-void AppsManagerUpdate(AppsManager_t* manager);
-void AppsManagerHandleInput(AppsManager_t* manager, const void* keyData);
-void AppsManagerPauseActiveApp(AppsManager_t* manager);
-void AppsManagerResumeActiveApp(AppsManager_t* manager);
-void AppsManagerStopActiveApp(AppsManager_t* manager);
-void AppsManagerStopAppWithId(AppsManager_t* manager, const _u16 appId);
+void apps_manager_update();
+void apps_manager_handle_input(const void* keyData);
+void apps_manager_pause_active_app();
+void apps_manager_resume_app();
+void apps_manager_stop_app();
 
-Array_t* AppsManagerGetAllApps(const AppsManager_t* manager);
-App_t* AppsManagerGetActiveApp(const AppsManager_t* manager);
+Array_t* apps_manager_get_all();
+app_t* apps_manager_get_active_app();
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif  // APPS_MANAGER_H

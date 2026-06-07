@@ -4,8 +4,8 @@
 #include <stdlib.h>
 
 typedef struct AppsManager_t {
-  App_t* menuApp;
-  App_t* activeApp;
+  app_t* menuApp;
+  app_t* activeApp;
   Array_t* apps;
   Stack_t* pausedApps;
   _u16 nextAppId;
@@ -14,69 +14,64 @@ typedef struct AppsManager_t {
 const _u8 MAX_APPS_COUNT = 20;
 const _u8 MAX_ACTIVE_APPS_COUNT = 5;
 
+static AppsManager_t apps_manager = {};
+
 static bool _FindAppByIdPredicate(const void* expected, const void* value);
-static _u16 _AppsManagerNextAppId(AppsManager_t* manager);
+static _u16 _AppsManagerNextAppId();
 
-AppsManager_t* AppsManagerCreate(void) {
-  AppsManager_t* appsManager = (AppsManager_t*)malloc(sizeof(AppsManager_t));
-
-  if (appsManager == NULL) return NULL;
-
-  appsManager->nextAppId = 0;
-  appsManager->activeApp = NULL;
-  appsManager->menuApp = NULL;
-  appsManager->apps = ArrayCreate(MAX_APPS_COUNT);
-  appsManager->pausedApps = StackCreate(MAX_ACTIVE_APPS_COUNT);
-
-  return appsManager;
+void apps_manager_init() {
+  apps_manager.nextAppId = 0;
+  apps_manager.activeApp = NULL;
+  apps_manager.menuApp = NULL;
+  apps_manager.apps = ArrayCreate(MAX_APPS_COUNT);
+  apps_manager.pausedApps = StackCreate(MAX_ACTIVE_APPS_COUNT);
 }
 
-App_t* AppsMangerSetLauncher(AppsManager_t* manager,
-                             AppSpecification_t* specs) {
-  if (ArrayIsFull(manager->apps) == true) {
+app_t* apps_manger_set_launcher(app_specification_t* specs) {
+  if (ArrayIsFull(apps_manager.apps) == true) {
     return NULL;
   }
-  specs->id = _AppsManagerNextAppId(manager);
-  App_t* launcher = AppCreate(specs);
-  manager->menuApp = launcher;
-
+  specs->id = _AppsManagerNextAppId();
+  app_t* launcher = AppCreate(specs);
+  apps_manager.menuApp = launcher;
+  AppOnOpen(apps_manager.menuApp);
   return launcher;
 }
 
-_u16 AppsMangerAddAppSpecs(AppsManager_t* manager, AppSpecification_t* specs) {
-  if (ArrayIsFull(manager->apps) == true) {
+_u16 apps_manager_add(app_specification_t* specs) {
+  if (ArrayIsFull(apps_manager.apps) == true) {
     return false;
   }
 
-  specs->id = _AppsManagerNextAppId(manager);
-  App_t* app = AppCreate(specs);
+  specs->id = _AppsManagerNextAppId();
+  app_t* app = AppCreate(specs);
 
-  if (ArrayAdd(manager->apps, app)) {
+  if (ArrayAdd(apps_manager.apps, app)) {
     return specs->id;
   }
   return APP_ID_NA;
 }
 
-void AppsManagerStart(AppsManager_t* manager, App_t* app) {
-  if (manager->menuApp != NULL &&
-      AppGetState(manager->menuApp) == StateRunning) {
+void apps_manager_start(app_t* app) {
+  if (apps_manager.menuApp != NULL &&
+      AppGetState(apps_manager.menuApp) == StateRunning) {
     return;
   }
 
-  if (manager->menuApp == NULL) {
-    manager->menuApp = app;
+  if (apps_manager.menuApp == NULL) {
+    apps_manager.menuApp = app;
   }
 
-  AppOnOpen(manager->menuApp);
+  AppOnOpen(apps_manager.menuApp);
 }
 
-void AppsManagerStartLastAddedApp(AppsManager_t* manager) {
-  Stack_t* pausedApps = manager->pausedApps;
-  Array_t* apps = manager->apps;
+void apps_manager_start_last_added_app() {
+  Stack_t* pausedApps = apps_manager.pausedApps;
+  Array_t* apps = apps_manager.apps;
 
   // if we ahave already running active app, exit
-  if (manager->activeApp != NULL &&
-      AppGetState(manager->activeApp) == StateRunning) {
+  if (apps_manager.activeApp != NULL &&
+      AppGetState(apps_manager.activeApp) == StateRunning) {
     return;
   }
 
@@ -87,123 +82,110 @@ void AppsManagerStartLastAddedApp(AppsManager_t* manager) {
 
   // there is some active app, resume it
   if (StackIsEmpty(pausedApps) == false) {
-    App_t* app = StackPop(pausedApps);
-    AppOnPause(manager->menuApp);
-    manager->activeApp = app;
+    app_t* app = StackPop(pausedApps);
+    AppOnPause(apps_manager.menuApp);
+    apps_manager.activeApp = app;
     AppOnResume(app);
     return;
   }
 
   // if regisered app presents, open it
   if (ArrayIsEmpty(apps) == false) {
-    AppOnPause(manager->menuApp);
-    App_t* app = ArrayLastValue(apps);
-    manager->activeApp = app;
+    AppOnPause(apps_manager.menuApp);
+    app_t* app = ArrayLastValue(apps);
+    apps_manager.activeApp = app;
     AppOnOpen(app);
   }
 }
 
-void AppsManagerStartAppWithId(AppsManager_t* manager, const _u16 appId) {
-  AppOnPause(manager->menuApp);
-  Array_t* apps = manager->apps;
+void apps_manager_start_with_Id(const _u16 appId) {
+  AppOnPause(apps_manager.menuApp);
+  Array_t* apps = apps_manager.apps;
 
   // if we have already running active app, exit
-  if (manager->activeApp != NULL &&
-      AppGetState(manager->activeApp) == StateRunning) {
-    AppOnResume(manager->menuApp);
+  if (apps_manager.activeApp != NULL &&
+      AppGetState(apps_manager.activeApp) == StateRunning) {
+    AppOnResume(apps_manager.menuApp);
     return;
   }
 
-  App_t* app = ArrayFind(apps, (void*)appId, &_FindAppByIdPredicate);
+  app_t* app = ArrayFind(apps, (void*)appId, &_FindAppByIdPredicate);
   if (app != NULL) {
-    manager->activeApp = app;
-    bool started = AppOnOpen(manager->activeApp);
+    apps_manager.activeApp = app;
+    bool started = AppOnOpen(apps_manager.activeApp);
     if (started == false) {
-      manager->activeApp = NULL;
-      AppOnResume(manager->menuApp);
+      apps_manager.activeApp = NULL;
+      AppOnResume(apps_manager.menuApp);
       return;
     }
   } else {
-    AppOnResume(manager->menuApp);
+    AppOnResume(apps_manager.menuApp);
   }
 }
 
-void AppsManagerUpdate(AppsManager_t* manager) {
-  App_t* activeApp = manager->activeApp;
+void apps_manager_update() {
+  app_t* activeApp = apps_manager.activeApp;
   if (activeApp != NULL) {
     AppOnUpdate(activeApp);
     return;
   }
-  AppOnUpdate(manager->menuApp);
+  if (apps_manager.menuApp != NULL) {
+    AppOnUpdate(apps_manager.menuApp);
+  }
 }
 
-void AppsManagerHandleInput(AppsManager_t* manager, const void* keyData) {
-  App_t* activeApp = manager->activeApp;
+void apps_manager_handle_input(const void* keyData) {
+  app_t* activeApp = apps_manager.activeApp;
   if (activeApp == NULL) {
-    activeApp = manager->menuApp;
+    activeApp = apps_manager.menuApp;
   }
 
   AppOnHandleInput(activeApp, keyData);
 }
 
-void AppsManagerPauseActiveApp(AppsManager_t* manager) {
-  App_t* activeApp = manager->activeApp;
+void apps_manager_pause_active_app() {
+  app_t* activeApp = apps_manager.activeApp;
   if (activeApp != NULL) {
     AppOnPause(activeApp);
-    StackPush(manager->pausedApps, activeApp);
-    manager->activeApp = NULL;
+    StackPush(apps_manager.pausedApps, activeApp);
+    activeApp = apps_manager.menuApp;
 
-    AppOnResume(manager->menuApp);
+    AppOnResume(activeApp);
   }
 }
 
-void AppsManagerResumeActiveApp(AppsManager_t* manager) {
-  if (manager->activeApp != NULL) {
+void apps_manager_resume_app() {
+  if (apps_manager.activeApp != NULL) {
     return;
   }
 
-  App_t* app = StackPop(manager->pausedApps);
+  app_t* app = StackPop(apps_manager.pausedApps);
   if (app != NULL) {
-    manager->activeApp = app;
+    apps_manager.activeApp = app;
     AppOnResume(app);
-    AppOnPause(manager->menuApp);
+    AppOnPause(apps_manager.menuApp);
   }
 }
 
-void AppsManagerStopActiveApp(AppsManager_t* manager) {
-  if (manager->activeApp == NULL) {
+void apps_manager_stop_app() {
+  if (apps_manager.activeApp == NULL) {
     return;
   }
 
-  AppOnPause(manager->activeApp);
-  AppOnStop(manager->activeApp);
+  AppOnPause(apps_manager.activeApp);
+  AppOnStop(apps_manager.activeApp);
 
-  manager->activeApp = NULL;
-  AppOnResume(manager->menuApp);
+  apps_manager.activeApp = NULL;
+  AppOnResume(apps_manager.menuApp);
 }
 
-void AppsManagerStopAppWithId(AppsManager_t* manager, const _u16 appId) {
-  if (manager->activeApp == NULL) {
-    return;
-  }
-
-  if (AppGetId(manager->activeApp) == appId) {
-    AppsManagerStopActiveApp(manager);
-  }
-}
-
-Array_t* AppsManagerGetAllApps(const AppsManager_t* manager) {
-  return manager->apps;
-}
-
-App_t* AppsManagerGetActiveApp(const AppsManager_t* manager) {
-  return manager->activeApp;
-}
+Array_t* apps_manager_get_all() { return apps_manager.apps; }
+app_t* apps_manager_get_active_app() { return apps_manager.activeApp; }
 
 //
 static bool _FindAppByIdPredicate(const void* expected, const void* value) {
   const _u16 appIdToFind = (_u16)expected;
-  App_t* app = (App_t*)value;
+  app_t* app = (app_t*)value;
   _u16 appId = AppGetId(app);
   return appIdToFind == appId;
 }
@@ -211,7 +193,7 @@ static bool _FindAppByIdPredicate(const void* expected, const void* value) {
 /**
  * @brief generate id for application
  */
-_u16 _AppsManagerNextAppId(AppsManager_t* manager) {
-  manager->nextAppId++;
-  return manager->nextAppId;
+_u16 _AppsManagerNextAppId() {
+  apps_manager.nextAppId++;
+  return apps_manager.nextAppId;
 }

@@ -2,14 +2,13 @@
 
 #include <stdlib.h>
 
-typedef struct App_t {
-  AppSpecification_t* specification;
+typedef struct app_t {
+  app_specification_t* specification;
+  app_state_t state;
+} app_t;
 
-  AppState_t state;
-} App_t;
-
-App_t* AppCreate(AppSpecification_t* specification) {
-  App_t* app = (App_t*)malloc(sizeof(App_t));
+app_t* AppCreate(app_specification_t* specification) {
+  app_t* app = (app_t*)malloc(sizeof(app_t));
 
   if (app == NULL) return NULL;
 
@@ -19,17 +18,17 @@ App_t* AppCreate(AppSpecification_t* specification) {
   return app;
 }
 
-void AppDestroy(App_t* app) {
+void AppDestroy(app_t* app) {
   if (app == NULL) return;
   if (app->state != StateStoped) return;
 
   free(app);
 }
 
-bool AppOnOpen(App_t* app) {
+bool AppOnOpen(app_t* app) {
   if (app->state == StateInit || app->state == StateStoped) {
     app->state = StateRunning;
-    AppSpecification_t* specs = app->specification;
+    app_specification_t* specs = app->specification;
 
     if (specs->onStart != NULL) {
       specs->onStart();
@@ -42,10 +41,13 @@ bool AppOnOpen(App_t* app) {
   }
 }
 
-void AppOnUpdate(App_t* app) {
+void AppOnUpdate(app_t* app) {
   if (app->state != StateRunning) return;
   app->state = StateUpdate;
-  AppSpecification_t* specs = app->specification;
+  app_specification_t* specs = app->specification;
+  if (specs == NULL) {
+    return;
+  }
 
   if (specs->onUpdate != NULL) {
     specs->onUpdate();
@@ -58,13 +60,13 @@ void AppOnUpdate(App_t* app) {
   app->state = StateRunning;
 }
 
-void AppOnHandleInput(App_t* app, const void* keyData) {
+void AppOnHandleInput(app_t* app, const void* keyData) {
   if (app->state == StateRunning && app->specification->handleInput != NULL) {
     app->specification->handleInput(keyData);
   }
 }
 
-bool AppOnPause(App_t* app) {
+bool AppOnPause(app_t* app) {
   if (app->state == StateRunning || app->state == StateUpdate) {
     app->state = StatePaused;
     if (app->specification->onPause != NULL) {
@@ -75,7 +77,7 @@ bool AppOnPause(App_t* app) {
   return false;
 }
 
-bool AppOnResume(App_t* app) {
+bool AppOnResume(app_t* app) {
   if (app->state == StatePaused) {
     app->state = StateRunning;
     if (app->specification->onResume != NULL) {
@@ -87,7 +89,7 @@ bool AppOnResume(App_t* app) {
   return false;
 }
 
-void AppOnStop(App_t* app) {
+void AppOnStop(app_t* app) {
   if (app->state == StateRunning || app->state == StatePaused) {
     app->state = StateStoped;
     if (app->specification->onStop != NULL) {
@@ -96,12 +98,12 @@ void AppOnStop(App_t* app) {
   }
 }
 
-const char* AppGetName(const App_t* app) { return app->specification->name; }
+const char* AppGetName(const app_t* app) { return app->specification->name; }
 
-_u16 AppGetId(const App_t* app) { return app->specification->id; }
+_u16 AppGetId(const app_t* app) { return app->specification->id; }
 
-AppState_t AppGetState(const App_t* app) { return app->state; }
+app_state_t AppGetState(const app_t* app) { return app->state; }
 
-AppSpecification_t* AppGetSpecification(const App_t* app) {
+app_specification_t* AppGetSpecification(const app_t* app) {
   return app->specification;
 }
