@@ -19,7 +19,7 @@ const int SCREEN_HEIGHT = 480;
 SDL_Window* gWindow = NULL;
 SDL_Surface* gScreenSurface = NULL;
 
-AppsManager_t* manager;
+apps_manager_t* manager;
 broadcast_manager_t* broadcastManager;
 
 broadcast_event_t event;

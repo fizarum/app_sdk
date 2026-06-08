@@ -10,7 +10,7 @@ extern "C" {
 
 #define APP_ID_NA UINT16_MAX
 
-typedef struct AppsManager_t AppsManager_t;
+typedef struct apps_manager_t apps_manager_t;
 
 void apps_manager_init();
 app_t* apps_manger_set_launcher(app_specification_t* specs);
@@ -20,7 +20,7 @@ app_t* apps_manger_set_launcher(app_specification_t* specs);
  * @returns app id if added or APP_ID_NA otherwise
  */
 _u16 apps_manager_add(app_specification_t* specs);
-void apps_manager_start(app_t* app);
+void apps_manager_start();
 void apps_manager_start_last_added_app();
 void apps_manager_start_with_Id(const _u16 appId);
 

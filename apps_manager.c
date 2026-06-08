@@ -3,18 +3,18 @@
 #include <stack.h>
 #include <stdlib.h>
 
-typedef struct AppsManager_t {
+typedef struct apps_manager_t {
   app_t* menuApp;
   app_t* activeApp;
   Array_t* apps;
   Stack_t* pausedApps;
   _u16 nextAppId;
-} AppsManager_t;
+} apps_manager_t;
 
 const _u8 MAX_APPS_COUNT = 20;
 const _u8 MAX_ACTIVE_APPS_COUNT = 5;
 
-static AppsManager_t apps_manager = {};
+static apps_manager_t apps_manager = {};
 
 static bool _FindAppByIdPredicate(const void* expected, const void* value);
 static _u16 _AppsManagerNextAppId();
@@ -52,14 +52,12 @@ _u16 apps_manager_add(app_specification_t* specs) {
   return APP_ID_NA;
 }
 
-void apps_manager_start(app_t* app) {
-  if (apps_manager.menuApp != NULL &&
-      AppGetState(apps_manager.menuApp) == StateRunning) {
-    return;
-  }
+void apps_manager_start() {
+  assert(apps_manager.menuApp != NULL);
 
-  if (apps_manager.menuApp == NULL) {
-    apps_manager.menuApp = app;
+  // if already running
+  if (AppGetState(apps_manager.menuApp) == StateRunning) {
+    return;
   }
 
   AppOnOpen(apps_manager.menuApp);
