@@ -7,7 +7,9 @@ extern "C" {
 #include <types.h>
 
 #include "app_state.h"
-#include "broadcast/broadcast_event.h"
+#include "broadcast/event.h"
+
+#define APP_ID_NA UINT16_MAX
 
 typedef void(UserCallback)(const _u16 appId);
 
