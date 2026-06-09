@@ -100,10 +100,16 @@ void AppOnStop(app_t* app) {
 
 const char* AppGetName(const app_t* app) { return app->specification->name; }
 
-_u16 AppGetId(const app_t* app) { return app->specification->id; }
+_u16 AppGetId(const app_t* app) {
+  if (app == NULL || app->specification == NULL) {
+    return APP_ID_NA;
+  }
+
+  return app->specification->id;
+}
 
 app_state_t AppGetState(const app_t* app) { return app->state; }
 
 app_specification_t* AppGetSpecification(const app_t* app) {
-  return app->specification;
+  return app != NULL ? app->specification : NULL;
 }
